@@ -1,0 +1,35 @@
+#to remove TE's upstream of analysis:
+
+#files are named: FungiDB-39_AfumigatusAf293_Genome.RM.tab and FungiDB-39_AfumigatusAf293_Genome.RM.gff3
+#and are in the folder: /bigdata/stajichlab/shared/projects/Afum_popgenome/variantcall/genome
+
+#in the folders: /bigdata/stajichlab/llofgren/Afum_AF100_Clades/Clade_1_DMC_1rep/genome
+#and: /bigdata/stajichlab/llofgren/Afum_AF100_Clades/Clade_1_DMC_2rep/genome
+
+
+#ln -s /bigdata/stajichlab/shared/projects/Afum_popgenome/variantcall/genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab . 
+#ln -s /bigdata/stajichlab/shared/projects/Afum_popgenome/variantcall/genome/FungiDB-39_AfumigatusAf293_Genome.RM.gff3 . 
+
+
+
+###use bedtools subtract to remove known TE regions
+
+cd /bigdata/stajichlab/llofgren/Afum_AF100_Clades/Clade_1_DMC_1rep/vcf
+
+module load bedtools
+
+#SNPS
+bedtools subtract -a Clade_1_DMC.selected.SNP.vcf.gz -b ../genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab -header > Clade_1_DMC.selected.SNP.NO_TEs.vcf 
+#INDELS
+bedtools subtract -a Clade_1_DMC.selected.INDEL.vcf.gz -b ../genome/FungiDB-39_AfumigatusAf293_Genome.RM.tab -header > Clade_1_DMC.selected.INDEL.NO_TEs.vcf 
+
+#compress
+bgzip Clade_1_DMC.selected.SNP.NO_TEs.vcf
+bgzip Clade_1_DMC.selected.INDEL.NO_TEs.vcf
+
+module load tabix
+#index:
+tabix -p vcf Clade_1_DMC.selected.INDEL.NO_TEs.vcf.gz
+tabix -p vcf Clade_1_DMC.selected.SNP.NO_TEs.vcf.gz
+
+#now run from the snpEff step (#6)
